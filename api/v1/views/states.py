@@ -13,6 +13,7 @@ from . import app_views
 # f are class properties to validate the request payload
 f = ("name",)
 
+
 @app_views.route("/states", methods=["GET", "POST"], strict_slashes=False)
 def all_states():
     """
@@ -23,7 +24,7 @@ def all_states():
     else:
         body = request.get_json(silent=True)
         if request.is_json and body:
-            pay = {k: v for k, v in body.items() if k in ("name",)}
+            pay = {k: v for k, v in body.items() if k in f}
             if not pay.get("name", None):
                 return jsonify({"message": "Missing name"}), 400
             new_state = State(**pay)
