@@ -19,8 +19,6 @@ def all_amenities():
     """
     Creates a new Amenity obj
     Retrieves the list of all City objects of a Amenity
-    Args:
-        state_id: primary key of an existing Amenity object
     """
     if request.method == "GET":
         return jsonify([a.to_dict() for a in storage.all(Amenity).values()])
@@ -44,7 +42,7 @@ def one_amenity(amenity_id):
     Retrieves an existing Amenity object
     Updates an existing Amenity object
     Args:
-        city_id: primary key of an existing Amenity object
+        amenity_id: primary key of an existing Amenity object
     """
     amen = storage.get(Amenity, amenity_id)
     if not amen:
