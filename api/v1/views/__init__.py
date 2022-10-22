@@ -16,3 +16,4 @@ __all__ = [app_views, storage, City, User, Place, State, Review, Amenity]
 
 from .index import *
 from .states import *
+from .cities import *
