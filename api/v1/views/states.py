@@ -10,6 +10,8 @@ from . import State
 from . import storage
 from . import app_views
 
+# f are class properties to validate the request payload
+f = ("name",)
 
 @app_views.route("/states", methods=["GET", "POST"], strict_slashes=False)
 def all_states():
@@ -31,7 +33,7 @@ def all_states():
 
 
 @app_views.route("/states/<state_id>",
-                 methods=["GET", "DELETE"], strict_slashes=False)
+                 methods=["GET", "PUT", "DELETE"], strict_slashes=False)
 def one_state(state_id):
     """
     Retrieves a State object
@@ -44,3 +46,10 @@ def one_state(state_id):
     elif request.method == "DELETE":
         storage.delete(state), storage.save()
         return {}
+    else:
+        body = request.get_json(silent=True)
+        if request.is_json and body:
+            [state.__dict__.update({k: v}) for k, v in body.items() if k in f]
+            state.save()
+            return jsonify(state.to_dict()), 200
+        return jsonify({"message": "Not a JSON"}), 400
