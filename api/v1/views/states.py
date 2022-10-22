@@ -30,7 +30,8 @@ def all_states():
         return jsonify({"message": "Not a JSON"}), 400
 
 
-@app_views.route("/states/<state_id>", strict_slashes=False)
+@app_views.route("/states/<state_id>",
+                 methods=["GET", "DELETE"], strict_slashes=False)
 def one_state(state_id):
     """
     Retrieves a State object
@@ -38,4 +39,8 @@ def one_state(state_id):
     state = storage.get(State, state_id)
     if not state:
         abort(404)
-    return state.to_dict()
+    if request.method == "GET":
+        return state.to_dict()
+    elif request.method == "DELETE":
+        storage.delete(state), storage.save()
+        return {}
