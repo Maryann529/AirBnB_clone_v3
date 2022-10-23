@@ -4,6 +4,8 @@ Create an app instance
 """
 import os
 from flask import Flask
+from flask import jsonify
+from flask import make_response
 
 from . import models
 from .views import app_views
@@ -22,11 +24,31 @@ def close_db(e=None):
 
 
 @app.errorhandler(404)
-def not_found(e=None):
+def not_found(e):
     """
-    Handling not found JSON response
+    Handling not found (404)
+    Args:
+        e: Exception
+    Returns:
+        JSON
     """
-    return {"error": "Not found"}, 404
+    status_code = e.__str__().split()[0]
+    message = e.description
+    return make_response(jsonify({"error": message}), status_code)
+
+
+@app.errorhandler(400)
+def bad_request(e):
+    """
+    Handling bad request (400)
+    Args:
+        e: Exception
+    Returns:
+        JSON
+    """
+    status_code = e.__str__().split()[0]
+    message = e.description
+    return make_response(jsonify({"error": message}), status_code)
 
 
 if __name__ == "__main__":
