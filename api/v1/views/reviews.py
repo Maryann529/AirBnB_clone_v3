@@ -47,7 +47,7 @@ def reviews_by_place(place_id):
 
 @app_views.route("/reviews/<review_id>",
                  methods=["GET", "PUT", "DELETE"], strict_slashes=False)
-def one_place(review_id):
+def one_review(review_id):
     """
     Deletes an existing Review object
     Retrieves an existing Review object
