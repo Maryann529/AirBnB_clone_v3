@@ -19,4 +19,5 @@ from .users import *
 from .places import *
 from .states import *
 from .cities import *
+from .reviews import *
 from .amenities import *
