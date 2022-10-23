@@ -26,7 +26,7 @@ def cities_by_state(state_id):
     """
     state = storage.get(State, str(state_id))
     if state is None:
-        abort(404)
+        abort(404, description="Not found")
     if request.method == "GET":
         return jsonify([c.to_dict() for c in state.cities])
     else:
@@ -34,12 +34,12 @@ def cities_by_state(state_id):
         if request.is_json and body:
             pay = {k: str(v) for k, v in body.items() if k in f}
             if not pay.get("name", None):
-                return jsonify({"message": "Missing name"}), 400
+                abort(400, description="Missing name")
             pay.update({"state_id": str(state_id)})
             new_city = City(**pay)
             storage.new(new_city), storage.save()
             return jsonify(new_city.to_dict()), 201
-        return jsonify({"message": "Not a JSON"}), 400
+        abort(400, description="Not a JSON")
 
 
 @app_views.route("/cities/<city_id>",
@@ -54,16 +54,16 @@ def one_city(city_id):
     """
     city = storage.get(City, str(city_id))
     if not city:
-        abort(404)
+        abort(404, description="Not a JSON")
     if request.method == "GET":
-        return city.to_dict()
+        return jsonify(city.to_dict())
     elif request.method == "DELETE":
         storage.delete(city), storage.save()
-        return {}
+        return jsonify({})
     else:
         body = request.get_json(silent=True)
         if request.is_json and body:
             [city.__dict__.update({k: v}) for k, v in body.items() if k in f]
             city.save()
             return jsonify(city.to_dict()), 200
-        return jsonify({"message": "Not a JSON"}), 400
+        abort(400, description="Not a JSON")

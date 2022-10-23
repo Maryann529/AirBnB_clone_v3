@@ -48,7 +48,7 @@ def places_by_city(city_id):
     """
     city = storage.get(City, str(city_id))
     if city is None:
-        abort(404)
+        abort(404, description="Not found")
     if request.method == "GET":
         places = {
             k: str(v) for k, v in storage.all(Place) if v.city_id == city_id}
@@ -59,14 +59,14 @@ def places_by_city(city_id):
             pay = {k: str(v) for k, v in body.items() if k in f}
             for k in f[0:2]:
                 if not pay.get(k, None):
-                    return jsonify({"message": "Missing " + k}), 400
+                    abort(400, description="Missing " + k)
             if not storage.get(User, str(pay.get("user_id"))):
                 abort(404)
             pay.update({"city_id": city_id})
             new_place = Place(**(validate_payload(pay)))
             storage.new(new_place), storage.save()
             return jsonify(new_place.to_dict()), 201
-        return jsonify({"message": "Not a JSON"}), 400
+        abort(400, description="Not a JSON")
 
 
 @app_views.route("/places/<place_id>",
@@ -81,12 +81,12 @@ def one_place(place_id):
     """
     place = storage.get(Place, str(place_id))
     if not place:
-        abort(404)
+        abort(404, description="Not found")
     if request.method == "GET":
-        return place.to_dict()
+        return jsonify(place.to_dict())
     elif request.method == "DELETE":
         storage.delete(place), storage.save()
-        return {}
+        return jsonify({})
     else:
         body = request.get_json(silent=True)
         if request.is_json and body is not None:
@@ -95,4 +95,4 @@ def one_place(place_id):
                 for k, v in pay.items() if k in f[1:]]
             place.save()
             return jsonify(place.to_dict()), 200
-        return jsonify({"message": "Not a JSON"}), 400
+        abort(400, description="Not a JSON")

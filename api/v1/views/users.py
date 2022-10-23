@@ -30,11 +30,11 @@ def all_users():
             pay = {k: str(v) for k, v in body.items() if k in f}
             for k in f:
                 if not pay.get(k, None):
-                    return jsonify({"message": "Missing " + k}), 400
+                    abort(400, description="Missing " + k)
             new_user = User(**pay)
             storage.new(new_user), storage.save()
             return jsonify(new_user.to_dict()), 201
-        return jsonify({"message": "Not a JSON"}), 400
+        abort(400, description="Not a JSON")
 
 
 @app_views.route("/users/<user_id>",
@@ -49,16 +49,16 @@ def one_user(user_id):
     """
     user = storage.get(User, str(user_id))
     if not user:
-        abort(404)
+        abort(404, description="Not found")
     if request.method == "GET":
-        return user.to_dict()
+        return jsonify(user.to_dict())
     elif request.method == "DELETE":
         storage.delete(user), storage.save()
-        return {}
+        return jsonify({})
     else:
         body = request.get_json(silent=True)
         if request.is_json and body:
             [user.__dict__.update({k: v}) for k, v in body.items() if k in f]
             user.save()
             return jsonify(user.to_dict()), 200
-        return jsonify({"message": "Not a JSON"}), 400
+        abort(400, description="Not a JSON")

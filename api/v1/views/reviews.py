@@ -26,7 +26,7 @@ def reviews_by_place(place_id):
     """
     place = storage.get(Place, str(place_id))
     if place is None:
-        abort(404)
+        abort(404, description="Not found")
     if request.method == "GET":
         return jsonify([r.to_dict() for r in place.reviews])
     else:
@@ -35,14 +35,14 @@ def reviews_by_place(place_id):
             pay = {k: str(v) for k, v in body.items() if k in f}
             for k in f:
                 if not pay.get(k, None):
-                    return jsonify({"message": "Missing " + k}), 400
+                    abort(400, description="Missing " + k)
             if not storage.get(User, str(pay.get("user_id"))):
                 abort(404)
             pay.update({"place_id": place_id})
             new_review = Review(**pay)
             storage.new(new_review), storage.save()
             return jsonify(new_review.to_dict()), 201
-        return jsonify({"message": "Not a JSON"}), 400
+        abort(400, description="Not a JSON")
 
 
 @app_views.route("/reviews/<review_id>",
@@ -57,12 +57,12 @@ def one_review(review_id):
     """
     review = storage.get(Review, str(review_id))
     if not review:
-        abort(404)
+        abort(404, description="Not found")
     if request.method == "GET":
-        return review.to_dict()
+        return jsonify(review.to_dict())
     elif request.method == "DELETE":
         storage.delete(review), storage.save()
-        return {}
+        return jsonify({})
     else:
         body = request.get_json(silent=True)
         if request.is_json and body is not None:
@@ -70,4 +70,4 @@ def one_review(review_id):
                 for k, v in body.items() if k in f[1:]]
             review.save()
             return jsonify(review.to_dict()), 200
-        return jsonify({"message": "Not a JSON"}), 400
+        abort(400, description="Not a JSON")

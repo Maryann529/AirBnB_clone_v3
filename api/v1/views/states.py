@@ -26,11 +26,11 @@ def all_states():
         if request.is_json and body:
             pay = {k: str(v) for k, v in body.items() if k in f}
             if not pay.get("name", None):
-                return jsonify({"message": "Missing name"}), 400
+                abort(400, description="Missing name")
             new_state = State(**pay)
             storage.new(new_state), storage.save()
             return jsonify(new_state.to_dict()), 201
-        return jsonify({"message": "Not a JSON"}), 400
+        abort(400, description="Not a JSON")
 
 
 @app_views.route("/states/<state_id>",
@@ -41,16 +41,16 @@ def one_state(state_id):
     """
     state = storage.get(State, str(state_id))
     if not state:
-        abort(404)
+        abort(404, description="Not found")
     if request.method == "GET":
-        return state.to_dict()
+        return jsonify(state.to_dict())
     elif request.method == "DELETE":
         storage.delete(state), storage.save()
-        return {}
+        return jsonify({})
     else:
         body = request.get_json(silent=True)
         if request.is_json and body:
             [state.__dict__.update({k: v}) for k, v in body.items() if k in f]
             state.save()
             return jsonify(state.to_dict()), 200
-        return jsonify({"message": "Not a JSON"}), 400
+        abort(400, description="Not a JSON")
