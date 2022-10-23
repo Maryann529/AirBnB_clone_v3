@@ -35,8 +35,8 @@ def cities_by_state(state_id):
             pay = {k: v for k, v in body.items() if k in f}
             if not pay.get("name", None):
                 return jsonify({"message": "Missing name"}), 400
+            pay.update({"state_id": str(state_id)})
             new_city = City(**pay)
-            new_city.state_id = state_id
             storage.new(new_city), storage.save()
             return jsonify(new_city.to_dict()), 201
         return jsonify({"message": "Not a JSON"}), 400

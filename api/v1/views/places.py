@@ -55,14 +55,14 @@ def places_by_city(city_id):
     else:
         body = request.get_json(silent=True)
         if request.is_json and body is not None:
-            pay = {k: v for k, v in body.items() if k in f}
+            pay = {k: str(v) for k, v in body.items() if k in f}
             for k in f[0:2]:
                 if not pay.get(k, None):
                     return jsonify({"message": "Missing " + k}), 400
             if not storage.get(User, str(pay.get("user_id"))):
                 abort(404)
+            pay.update({"city_id": city_id})
             new_place = Place(**(validate_payload(pay)))
-            new_place.city_id = city_id
             storage.new(new_place), storage.save()
             return jsonify(new_place.to_dict()), 201
         return jsonify({"message": "Not a JSON"}), 400
@@ -90,7 +90,7 @@ def one_place(place_id):
         body = request.get_json(silent=True)
         if request.is_json and body is not None:
             pay = validate_payload(body)
-            [place.__dict__.update({k: v})
+            [place.__dict__.update({k: str(v)})
                 for k, v in pay.items() if k in f[1:]]
             place.save()
             return jsonify(place.to_dict()), 200
