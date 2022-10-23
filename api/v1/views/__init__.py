@@ -21,3 +21,4 @@ from .states import *
 from .cities import *
 from .reviews import *
 from .amenities import *
+from .places_amenities import *
