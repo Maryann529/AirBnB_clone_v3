@@ -23,7 +23,7 @@ def all_states():
         return jsonify([s.to_dict() for s in storage.all(State).values()])
     else:
         body = request.get_json(silent=True)
-        if request.is_json and body:
+        if request.is_json and body is not None:
             pay = {k: str(v) for k, v in body.items() if k in f}
             if not pay.get("name", None):
                 abort(400, description="Missing name")

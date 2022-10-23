@@ -31,7 +31,7 @@ def cities_by_state(state_id):
         return jsonify([c.to_dict() for c in state.cities])
     else:
         body = request.get_json(silent=True)
-        if request.is_json and body:
+        if request.is_json and body is not None:
             pay = {k: str(v) for k, v in body.items() if k in f}
             if not pay.get("name", None):
                 abort(400, description="Missing name")

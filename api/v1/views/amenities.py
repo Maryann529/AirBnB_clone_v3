@@ -24,7 +24,7 @@ def all_amenities():
         return jsonify([a.to_dict() for a in storage.all(Amenity).values()])
     else:
         body = request.get_json(silent=True)
-        if request.is_json and body:
+        if request.is_json and body is not None:
             pay = {k: str(v) for k, v in body.items() if k in f}
             if not pay.get("name", None):
                 abort(400, description="Missing name")
@@ -54,8 +54,9 @@ def one_amenity(amenity_id):
         return jsonify({})
     else:
         body = request.get_json(silent=True)
-        if request.is_json and body:
-            [amen.__dict__.update({k: v}) for k, v in body.items() if k in f]
+        if request.is_json and body is not None:
+            [amen.__dict__.update({k: str(v)})
+                for k, v in body.items() if k in f]
             amen.save()
             return jsonify(amen.to_dict()), 200
         abort(400, description="Not a JSON")
