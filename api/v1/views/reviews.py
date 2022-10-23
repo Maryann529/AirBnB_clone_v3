@@ -24,7 +24,7 @@ def reviews_by_place(place_id):
     Args:
         place_id: primary key of an existing Review object
     """
-    place = storage.get(Place, place_id)
+    place = storage.get(Place, str(place_id))
     if place is None:
         abort(404)
     if request.method == "GET":
@@ -55,7 +55,7 @@ def one_place(review_id):
     Args:
         review_id: primary key of an existing Review object
     """
-    review = storage.get(Review, review_id)
+    review = storage.get(Review, str(review_id))
     if not review:
         abort(404)
     if request.method == "GET":

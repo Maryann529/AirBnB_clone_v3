@@ -24,7 +24,7 @@ def all_states():
     else:
         body = request.get_json(silent=True)
         if request.is_json and body:
-            pay = {k: v for k, v in body.items() if k in f}
+            pay = {k: str(v) for k, v in body.items() if k in f}
             if not pay.get("name", None):
                 return jsonify({"message": "Missing name"}), 400
             new_state = State(**pay)
@@ -39,7 +39,7 @@ def one_state(state_id):
     """
     Retrieves a State object
     """
-    state = storage.get(State, state_id)
+    state = storage.get(State, str(state_id))
     if not state:
         abort(404)
     if request.method == "GET":

@@ -25,7 +25,7 @@ def all_amenities():
     else:
         body = request.get_json(silent=True)
         if request.is_json and body:
-            pay = {k: v for k, v in body.items() if k in f}
+            pay = {k: str(v) for k, v in body.items() if k in f}
             if not pay.get("name", None):
                 return jsonify({"message": "Missing name"}), 400
             new_amenity = Amenity(**pay)
@@ -44,7 +44,7 @@ def one_amenity(amenity_id):
     Args:
         amenity_id: primary key of an existing Amenity object
     """
-    amen = storage.get(Amenity, amenity_id)
+    amen = storage.get(Amenity, str(amenity_id))
     if not amen:
         abort(404)
     if request.method == "GET":

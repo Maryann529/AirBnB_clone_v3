@@ -24,7 +24,7 @@ def cities_by_state(state_id):
     Args:
         state_id: primary key of an existing state object
     """
-    state = storage.get(State, state_id)
+    state = storage.get(State, str(state_id))
     if state is None:
         abort(404)
     if request.method == "GET":
@@ -32,7 +32,7 @@ def cities_by_state(state_id):
     else:
         body = request.get_json(silent=True)
         if request.is_json and body:
-            pay = {k: v for k, v in body.items() if k in f}
+            pay = {k: str(v) for k, v in body.items() if k in f}
             if not pay.get("name", None):
                 return jsonify({"message": "Missing name"}), 400
             pay.update({"state_id": str(state_id)})
@@ -52,7 +52,7 @@ def one_city(city_id):
     Args:
         city_id: primary key of an existing city object
     """
-    city = storage.get(City, city_id)
+    city = storage.get(City, str(city_id))
     if not city:
         abort(404)
     if request.method == "GET":

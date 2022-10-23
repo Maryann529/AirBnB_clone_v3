@@ -46,11 +46,12 @@ def places_by_city(city_id):
     Args:
         city_id: primary key of an existing Place object
     """
-    city = storage.get(City, city_id)
+    city = storage.get(City, str(city_id))
     if city is None:
         abort(404)
     if request.method == "GET":
-        places = {k: v for k, v in storage.all(Place) if v.city_id == city_id}
+        places = {
+            k: str(v) for k, v in storage.all(Place) if v.city_id == city_id}
         return jsonify([p.to_dict() for p in places.values()])
     else:
         body = request.get_json(silent=True)
@@ -78,7 +79,7 @@ def one_place(place_id):
     Args:
         city_id: primary key of an existing city object
     """
-    place = storage.get(Place, place_id)
+    place = storage.get(Place, str(place_id))
     if not place:
         abort(404)
     if request.method == "GET":

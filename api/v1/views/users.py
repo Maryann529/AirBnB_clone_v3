@@ -27,7 +27,7 @@ def all_users():
     else:
         body = request.get_json(silent=True)
         if request.is_json and body:
-            pay = {k: v for k, v in body.items() if k in f}
+            pay = {k: str(v) for k, v in body.items() if k in f}
             for k in f:
                 if not pay.get(k, None):
                     return jsonify({"message": "Missing " + k}), 400
@@ -47,7 +47,7 @@ def one_user(user_id):
     Args:
         user_id: primary key of an existing User object
     """
-    user = storage.get(User, user_id)
+    user = storage.get(User, str(user_id))
     if not user:
         abort(404)
     if request.method == "GET":
