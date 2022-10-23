@@ -34,4 +34,22 @@ def one_amenity_in_place(amenity_id, place_id):
         amenity_id (str): id of an Amenity object
         place_id (str): id of a Place object
     """
-    pass
+    place = storage.get(Place, str(place_id))
+    amenity = storage.get(Amenity, str(amenity_id))
+    if place is None or amenity is None or amenity not in place.amenities:
+        abort(404, description="Not found")
+    storage_type = os.getenv("HBNB_TYPE_STORAGE", None)
+    if request.method == "DELETE":
+        if storage_type == "db":
+            place.amenities.remove(amenity)
+        else:
+            place.amenity_ids.remove(amenity.id)
+        return jsonify({})
+    else:
+        if amenity in place.amenities:
+            return jsonify({})
+        if storage_type == "db":
+            place.amenities = amenity
+        else:
+            place.amenity_ids.append(amenity.id)
+        return jsonify(amenity), 201
