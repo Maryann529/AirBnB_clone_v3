@@ -5,7 +5,6 @@ Create an app instance
 import os
 from flask import Flask
 from flask import jsonify
-from flask import make_response
 
 from . import models
 from .views import app_views
@@ -32,9 +31,9 @@ def not_found(e):
     Returns:
         JSON
     """
-    status_code = e.__str__().split()[0]
+    status_code = str(e).split()[0]
     message = e.description
-    return make_response(jsonify({"error": message}), status_code)
+    return jsonify({"error": message}), status_code
 
 
 @app.errorhandler(400)
@@ -46,9 +45,9 @@ def bad_request(e):
     Returns:
         JSON
     """
-    status_code = e.__str__().split()[0]
+    status_code = str(e).split()[0]
     message = e.description
-    return make_response(jsonify({"error": message}), status_code)
+    return jsonify({"error": message}), status_code
 
 
 if __name__ == "__main__":
