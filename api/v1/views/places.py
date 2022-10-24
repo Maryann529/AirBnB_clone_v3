@@ -9,6 +9,7 @@ from flask import request
 from . import User
 from . import City
 from . import Place
+from . import State
 from . import storage
 from . import app_views
 
@@ -96,3 +97,34 @@ def one_place(place_id):
             place.save()
             return jsonify(place.to_dict()), 200
         abort(400, description="Not a JSON")
+
+
+@app_views.route("/places_search", strict_slashes=False)
+def places_search():
+    """
+    Search for places by states and cities inclusive, filter by amenities
+    """
+    body = request.get_json(silent=True)
+    if body is None:
+        abort(400, "Not a JSON")
+    states, cities, amenities = (
+        body.get("states", []),
+        body.get("cities", []), body.get("amenities", []))
+    places = storage.all(Place).values()
+    if body == {} or (states == [] and cities == [] and amenities == []):
+        return jsonify([p.to_dict() for p in places])
+    for sid in states:
+        state = storage.get(State, sid)
+        cities += [c.id for c in state.cities]
+    cities = list(set(cities))
+    places = [p for p in places if p.city_id in cities]
+    result = []
+    for aid in amenities:
+        for p in places:
+            if p in result:
+                continue
+            paids = [a.id for a in p.amenities]
+            if aid in paids:
+                result.append(p)
+    result = result if len(result) > 0 else places
+    return jsonify(list(set([p.to_dict() for p in result])))
