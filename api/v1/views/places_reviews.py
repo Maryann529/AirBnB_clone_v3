@@ -36,8 +36,9 @@ def reviews_by_place(place_id):
             for k in f:
                 if not pay.get(k, None):
                     abort(400, description="Missing " + k)
-            if not storage.get(User, str(pay.get("user_id"))):
-                abort(404)
+                if k == "user_id" and\
+                        not storage.get(User, str(pay.get("user_id"))):
+                    abort(404, description="Not found")
             pay.update({"place_id": place_id})
             new_review = Review(**pay)
             storage.new(new_review), storage.save()
