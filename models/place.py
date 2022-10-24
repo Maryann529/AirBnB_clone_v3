@@ -81,5 +81,6 @@ class Place(BaseModel, Base):
         def amenities(self, obj):
             """Appends an Amenity object to amenity_ids"""
             from models.amenity import Amenity
-            if isinstance(obj, Amenity) and type(obj) == Amenity:
-                self.amenity_ids.append(obj.id)
+            if isinstance(obj, Amenity):
+                if obj.id not in self.amenity_ids:
+                    self.amenity_ids.append(obj.id)
