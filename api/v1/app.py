@@ -34,7 +34,7 @@ def not_found(e):
         JSON
     """
     status_code = str(e).split()[0]
-    message = e.description
+    message = e.description if "Not found" in e.description else "Not found"
     return jsonify({"error": message}), status_code
 
 
