@@ -154,8 +154,8 @@ EOF  all  create  destroy  help  quit  show  update
 No known bugs at this time. 
 
 ## Authors
-Maryann Unoarumi - [Github](https://github.com/Maryann529)
-Mendie Uwemedimo - [Github](https://github.com/@slamchillz)
+  * Maryann Unoarumi - [Github](https://github.com/Maryann529)
+  * Mendie Uwemedimo - [Github](https://github.com/@slamchillz)
 
 Second part of Airbnb: Joann Vuong
 ## License
