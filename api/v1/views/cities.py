@@ -54,7 +54,7 @@ def one_city(city_id):
     """
     city = storage.get(City, str(city_id))
     if not city:
-        abort(404, description="Not a JSON")
+        abort(404, description="Not found")
     if request.method == "GET":
         return jsonify(city.to_dict())
     elif request.method == "DELETE":
