@@ -2,6 +2,7 @@
 """
 A new view for User objects that handles all default RESTFul API actions
 """
+from hashlib import md5
 from flask import abort
 from flask import jsonify
 from flask import request
@@ -28,7 +29,7 @@ def all_users():
         body = request.get_json(silent=True)
         if request.is_json and body is not None:
             pay = {k: str(v) for k, v in body.items() if k in f}
-            for k in f:
+            for k in f[:2]:
                 if not pay.get(k, None):
                     abort(400, description="Missing " + k)
             new_user = User(**pay)
@@ -58,8 +59,10 @@ def one_user(user_id):
     else:
         body = request.get_json(silent=True)
         if request.is_json and body is not None:
-            [user.__dict__.update({k: str(v)})
-                for k, v in body.items() if k in f[1:]]
-            user.save()
+            pay = {k: str(v) for k, v in body.items() if k in f[1:]}
+            if pay.get("password", None):
+                p = pay.get("password")
+                pay.update({"password": md5(bytes(p, 'utf-8')).hexdigest()})
+            user.__dict__.update(pay), user.save()
             return jsonify(user.to_dict()), 200
         abort(400, description="Not a JSON")
