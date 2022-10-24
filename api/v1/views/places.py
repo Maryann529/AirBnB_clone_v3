@@ -10,6 +10,7 @@ from . import User
 from . import City
 from . import Place
 from . import State
+from . import Amenity
 from . import storage
 from . import app_views
 
@@ -24,17 +25,18 @@ def validate_payload(payload={}):
     """
     for _ in f[3:7]:
         value = payload.get(_, None)
-        if value and value.isnumeric():
-            payload.update({_: int(value)})
-        else:
-            del payload[_]
+        if value is not None:
+            try:
+                payload.update({_: int(value)})
+            except Exception:
+                del payload[_]
     for _ in f[-2:]:
         value = payload.get(_, None)
-        try:
-            if value and isinstance(float(value), float):
+        if value is not None:
+            try:
                 payload.update({_: float(value)})
-        except Exception:
-            del payload[_]
+            except Exception:
+                del payload[_]
     return payload
 
 
@@ -51,8 +53,9 @@ def places_by_city(city_id):
     if city is None:
         abort(404, description="Not found")
     if request.method == "GET":
-        places = {
-            k: str(v) for k, v in storage.all(Place) if v.city_id == city_id}
+        places = {k: v
+                  for k, v in storage.all(Place).items()
+                  if v.city_id == city_id}
         return jsonify([p.to_dict() for p in places.values()])
     else:
         body = request.get_json(silent=True)
@@ -61,8 +64,9 @@ def places_by_city(city_id):
             for k in f[0:2]:
                 if not pay.get(k, None):
                     abort(400, description="Missing " + k)
-            if not storage.get(User, str(pay.get("user_id"))):
-                abort(404)
+                if k == "user_id" and\
+                        not storage.get(User, str(pay.get("user_id"))):
+                    abort(404, description="Not found")
             pay.update({"city_id": city_id})
             new_place = Place(**(validate_payload(pay)))
             storage.new(new_place), storage.save()
@@ -99,7 +103,7 @@ def one_place(place_id):
         abort(400, description="Not a JSON")
 
 
-@app_views.route("/places_search", strict_slashes=False)
+@app_views.route("/places_search", methods=["POST"], strict_slashes=False)
 def places_search():
     """
     Search for places by states and cities inclusive, filter by amenities
@@ -110,21 +114,18 @@ def places_search():
     states, cities, amenities = (
         body.get("states", []),
         body.get("cities", []), body.get("amenities", []))
-    places = storage.all(Place).values()
-    if body == {} or (states == [] and cities == [] and amenities == []):
-        return jsonify([p.to_dict() for p in places])
+    if body == {} or all(v == [] for v in body.values()):
+        return jsonify([p.to_dict() for p in storage.all(Place).values()])
+    places = []
     for sid in states:
         state = storage.get(State, sid)
-        cities += [c.id for c in state.cities]
-    cities = list(set(cities))
-    places = [p for p in places if p.city_id in cities]
-    result = []
-    for aid in amenities:
-        for p in places:
-            if p in result:
-                continue
-            paids = [a.id for a in p.amenities]
-            if aid in paids:
-                result.append(p)
-    result = result if len(result) > 0 else places
-    return jsonify(list(set([p.to_dict() for p in result])))
+        for city in state.cities:
+            places.extend(city.places)
+    for cid in cities:
+        city = storage.get(City, cid)
+        places += city.places
+    amenitylist = [storage.get(Amenity, aid) for aid in amenities]
+    for p in places:
+        if all(amen in p.amenities for amen in amenitylist) is False:
+            places.remove(p)
+    return jsonify([p.to_dict() for p in places])
