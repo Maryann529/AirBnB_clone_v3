@@ -11,7 +11,7 @@ from . import storage
 from . import app_views
 
 # f are class properties to validate the request payload
-f = ("email", "password")
+f = ("email", "password", "first_name", "last_name")
 
 
 @app_views.route("/users", methods=["GET", "POST"], strict_slashes=False)
