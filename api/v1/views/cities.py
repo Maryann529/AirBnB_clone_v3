@@ -63,7 +63,7 @@ def one_city(city_id):
     else:
         body = request.get_json(silent=True)
         if request.is_json and body:
-            [city.__dict__.update({k: v}) for k, v in body.items() if k in f]
+            [setattr(city, k, str(v)) for k, v in body.items() if k in f]
             city.save()
             return jsonify(city.to_dict()), 200
         abort(400, description="Not a JSON")

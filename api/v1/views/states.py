@@ -50,7 +50,7 @@ def one_state(state_id):
     else:
         body = request.get_json(silent=True)
         if request.is_json and body:
-            [state.__dict__.update({k: v}) for k, v in body.items() if k in f]
+            [setattr(state, k, str(v)) for k, v in body.items() if k in f]
             state.save()
             return jsonify(state.to_dict()), 200
         abort(400, description="Not a JSON")

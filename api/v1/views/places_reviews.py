@@ -67,7 +67,7 @@ def one_review(review_id):
     else:
         body = request.get_json(silent=True)
         if request.is_json and body is not None:
-            [review.__dict__.update({k: str(v)})
+            [setattr(review, k, str(v))
                 for k, v in body.items() if k in f[1:]]
             review.save()
             return jsonify(review.to_dict()), 200
