@@ -11,7 +11,6 @@ from models.review import Review
 from models.state import State
 from models.user import User
 from os import getenv
-from sqlalchemy import func
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
@@ -83,10 +82,7 @@ class DBStorage:
     def count(self, cls=None):
         """method to count the number of objects in storage"""
         count = 0
-        if cls is not None:
-            count = self.__session.query(func.count(cls.id)).scalar()
-        else:
-            for class_ in classes:
-                Model = classes[class_]
-                count += self.__session.query(func.count(Model.id)).scalar()
+        for clss in classes:
+            if cls is None or cls is classes[clss] or cls is clss:
+                count += self.__session.query(classes[clss]).count()
         return count
