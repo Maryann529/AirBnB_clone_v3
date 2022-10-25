@@ -33,7 +33,7 @@ class Place(BaseModel, Base):
         price_by_night = Column(Integer, nullable=False, default=0)
         latitude = Column(Float, nullable=True)
         longitude = Column(Float, nullable=True)
-        reviews = relationship("Review", backref="place")
+        reviews = relationship("Review", backref="place", cascade="delete")
         amenities = relationship("Amenity", secondary="place_amenity",
                                  backref="place_amenities",
                                  viewonly=False)
@@ -73,6 +73,14 @@ class Place(BaseModel, Base):
             amenity_list = []
             all_amenities = models.storage.all(Amenity)
             for amenity in all_amenities.values():
-                if amenity.place_id == self.id:
+                if amenity.id in self.amenity_ids:
                     amenity_list.append(amenity)
             return amenity_list
+
+        @amenities.setter
+        def amenities(self, obj):
+            """Appends an Amenity object to amenity_ids"""
+            from models.amenity import Amenity
+            if isinstance(obj, Amenity):
+                if obj.id not in self.amenity_ids:
+                    self.amenity_ids.append(obj.id)
