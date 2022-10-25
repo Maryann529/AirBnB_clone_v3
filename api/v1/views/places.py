@@ -96,8 +96,7 @@ def one_place(place_id):
         body = request.get_json(silent=True)
         if request.is_json and body is not None:
             pay = validate_payload(body)
-            [place.__dict__.update({k: str(v)})
-                for k, v in pay.items() if k in f[1:]]
+            [setattr(place, k, str(v)) for k, v in pay.items() if k in f[1:]]
             place.save()
             return jsonify(place.to_dict()), 200
         abort(400, description="Not a JSON")

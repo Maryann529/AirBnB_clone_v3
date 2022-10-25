@@ -63,6 +63,7 @@ def one_user(user_id):
             if pay.get("password", None):
                 p = pay.get("password")
                 pay.update({"password": md5(bytes(p, 'utf-8')).hexdigest()})
-            user.__dict__.update(pay), user.save()
+            [setattr(user, k, str(v)) for k, v in pay.items()]
+            user.save()
             return jsonify(user.to_dict()), 200
         abort(400, description="Not a JSON")

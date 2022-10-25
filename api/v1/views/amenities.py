@@ -55,8 +55,7 @@ def one_amenity(amenity_id):
     else:
         body = request.get_json(silent=True)
         if request.is_json and body is not None:
-            [amen.__dict__.update({k: str(v)})
-                for k, v in body.items() if k in f]
+            [setattr(amen, k, str(v)) for k, v in body.items() if k in f]
             amen.save()
             return jsonify(amen.to_dict()), 200
         abort(400, description="Not a JSON")
