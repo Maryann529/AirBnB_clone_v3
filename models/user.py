@@ -28,5 +28,6 @@ class User(BaseModel, Base):
         """initializes user"""
         from hashlib import md5
         pas = kwargs.get("password", None)
-        kwargs.update({"password": md5(bytes(pas, "utf-8")).hexdigest()})
+        if pas is not None:
+            kwargs.update({"password": md5(bytes(pas, "utf-8")).hexdigest()})
         super().__init__(*args, **kwargs)
