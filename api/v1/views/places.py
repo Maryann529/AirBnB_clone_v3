@@ -108,26 +108,36 @@ def places_search():
     Search for places by states and cities inclusive, filter by amenities
     """
     body = request.get_json(silent=True)
-    if body is None:
-        abort(400, "Not a JSON")
-    places = storage.all(Place)
-    states, cities, amenities = (
-        body.get("states", []),
-        body.get("cities", []), body.get("amenities", []))
-    if body == {} or all(v == [] for v in body.values()):
-        return jsonify([p.to_dict() for p in places.values()])
-    for sid in states:
-        state = storage.get(State, sid)
-        for city in state.cities:
-            places.extend(city.places)
-    for cid in cities:
-        city = storage.get(City, cid)
-        places += city.places
-    amenitylist = [storage.get(Amenity, aid) for aid in amenities]
-    _places = [p.to_dict() for p in places.values()]
-    for p in places.values():
-        if all(amen in p.amenities for amen in amenitylist) is False:
-            for _p in _places:
-                if p.id == _p["id"]:
-                    _places.remove(_p)
-    return jsonify(_places)
+    if body is not None:
+        if body == {} or all([v == [] for k, v in body.items()]):
+            places = storage.all(Place)
+            li_places = [v.to_dict() for k, v in places.items()]
+            return jsonify(li_places), 200
+        pslist = []
+        if 'states' in body and body['states'] != []:
+            for state_id in body['states']:
+                state = storage.get(State, state_id)
+                for city in state.cities:
+                    pslist.extend(city.places)
+        if 'cities' in body and body['cities'] != []:
+            for city_id in body['cities']:
+                city = storage.get(City, city_id)
+                for place in city.places:
+                    if place not in pslist:
+                        pslist.append(place)
+        if pslist == []:
+            places = storage.all(Place)
+            pslist = [v for k, v in places.items()]
+        li_places = [place.to_dict() for place in pslist]
+        if 'amenities' in body and body['amenities'] != []:
+            amenitylist = [storage.get(Amenity, amenity_id)
+                           for amenity_id in body['amenities']]
+            for place in pslist:
+                if all(amenity in place.amenities
+                       for amenity in amenitylist) is False:
+                    for li_place in li_places:
+                        if place.id == li_place['id']:
+                            li_places.remove(li_place)
+        return jsonify(li_places), 200
+    else:
+        abort(400, {'message': 'Not a JSON'})
